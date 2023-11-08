@@ -2,6 +2,8 @@
 
 # Import and initialize pygame
 import pygame
+# Get the clock
+clock = pygame.time.Clock()
 
 class GameObject(pygame.sprite.Sprite):
   def __init__(self, x, y, image):
@@ -19,16 +21,7 @@ pygame.init()
 # Configure the screen
 screen = pygame.display.set_mode([500, 500])
 
-apple1 = GameObject(0, 0, 'apple.png')
-apple2 = GameObject(450, 0, 'apple.png')
-apple3 = GameObject(200, 200, 'apple.png')
-apple4 = GameObject(450, 450, 'apple.png')
-apple5 = GameObject(0, 450, 'apple.png')
-
-strawberry1 = GameObject(245, 0, 'strawberry.png')
-strawberry2 = GameObject(0, 245, 'strawberry.png')
-strawberry3 = GameObject(450, 245, 'strawberry.png')
-strawberry4 = GameObject(245, 450, 'strawberry.png')
+apple1 = GameObject(0, 250, 'apple.png')
 
 
 # Create the game loop
@@ -42,19 +35,12 @@ while running:
   screen.fill((0, 0, 0))
 
   # Draw the box object
+  apple1.x += 2
   apple1.render(screen)
-  apple2.render(screen)
-  apple3.render(screen)
-  apple4.render(screen)
-  apple5.render(screen)
-
-  strawberry1.render(screen)
-  strawberry2.render(screen)
-  strawberry3.render(screen)
-  strawberry4.render(screen)
 
   # Update the window
   pygame.display.flip()
+  clock.tick(60)
 
 # Quit pygame when the loop exits
 pygame.quit()
