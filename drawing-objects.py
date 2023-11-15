@@ -47,7 +47,40 @@ class Strawberry(GameObject):
     def reset(self):
         self.x = random.choice([93, 343])  # Randomly choose between 93 and 343 for x
         self.y = randint(0, 500)
+class Player(GameObject):
+  def __init__(self):
+    super(Player, self).__init__(0, 0, 'player.png')
+    self.dx = 0
+    self.dy = 0
+    self.reset()
 
+  def left(self):
+    self.dx -= 100
+
+  def right(self):
+    self.dx += 100
+
+
+  def up(self):
+    self.dy -= 100
+
+
+  def down(self):
+    self.dy += 100
+
+
+  def move(self):
+    self.x -= (self.x - self.dx) * 0.25
+    self.y -= (self.y - self.dy) * 0.25
+    
+    # Restrict the player's position to stay within the screen boundaries
+    self.x = max(0, min(self.x, 500 - self.surf.get_width()))
+    self.y = max(0, min(self.y, 500 - self.surf.get_height()))
+
+  def reset(self):
+    self.x = 250 - 32
+    self.y = 250 - 32
+  
 
     
 pygame.init()
@@ -58,6 +91,7 @@ screen = pygame.display.set_mode([500, 500])
 # Create the apple object
 apple = Apple()
 strawberry = Strawberry()
+player = Player() #Create an instance of the Player class
 
 
 # Create the game loop
@@ -67,11 +101,31 @@ while running:
   for event in pygame.event.get():
     if event.type == pygame.QUIT:
       running = False
+# Check for event type KEYBOARD
+    elif event.type == pygame.KEYDOWN:
+      if event.key == pygame.K_ESCAPE:
+          running = False
+      elif event.key == pygame.K_LEFT:
+          player.left()
+      elif event.key == pygame.K_RIGHT:
+          player.right()
+      elif event.key == pygame.K_UP:
+          player.up()
+      elif event.key == pygame.K_DOWN:
+          player.down()
+
+      
       # Clear screen
   screen.fill((0, 0, 0))
+  
   # Draw apple
   apple.move()
   apple.render(screen)
+  
+  #Draw player
+  player.move()
+  player.render(screen)
+  
   #Draw strawberry 
   strawberry.move()
   strawberry.render(screen)
