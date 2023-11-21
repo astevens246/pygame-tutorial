@@ -9,7 +9,8 @@ clock = pygame.time.Clock()
 class GameObject(pygame.sprite.Sprite):
   def __init__(self, x, y, image):
     super(GameObject, self).__init__()
-    self.surf = pygame.image.load(image) #add image
+    self.image = pygame.image.load(image) #add image
+    self.rect = self.image.get_rect(topleft=(x, y))
     self.x = x
     self.y = y
   
@@ -88,10 +89,23 @@ pygame.init()
   
 # Configure the screen
 screen = pygame.display.set_mode([500, 500])
+
+# Create sprite groups 
+all_sprites = pygame.sprite.Group()
+apples_group = pygame.sprite.Group()
+strawberries_group = pygame.sprite.Group()
+player_group = pygame.sprite.Group()
+
 # Create the apple object
 apple = Apple()
 strawberry = Strawberry()
 player = Player() #Create an instance of the Player class
+
+# Add sprites to groups
+all_sprites.add(apple, strawberry, player)
+apples_group.add(apple)
+strawberries_group.add(strawberry)
+player_group.add(player)
 
 
 # Create the game loop
@@ -114,22 +128,15 @@ while running:
       elif event.key == pygame.K_DOWN:
           player.down()
 
-      
-      # Clear screen
+  
+  # Update all sprites 
+  all_sprites.update()
+
+  # Clear screen
   screen.fill((0, 0, 0))
   
-  # Draw apple
-  apple.move()
-  apple.render(screen)
-  
-  #Draw player
-  player.move()
-  player.render(screen)
-  
-  #Draw strawberry 
-  strawberry.move()
-  strawberry.render(screen)
-
+  # Draw sprites
+  all_sprites.draw(screen)
 
 
 
