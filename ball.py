@@ -17,14 +17,15 @@ class Ball(GameObject):
         self.rect.y += self.dy
         if self.rect.y > 500:
             self.reset()
-        print(f'{self.__class__.__name__} Position: ({self.rect.x}, {self.rect.y})')
 
     def reset(self):
         self.rect.x = random.choice(lanes)
         self.rect.y = -64
         self.dy = randint(1, 2)
-        return 40000000  # Add 40 million points when a fruit is collected
-
+        # Return different values based on ball type
+        if self.ball_type == 'bomb_ball':
+            return 0  # Reset the score to 0 on bomb collision
+        else:
+            return 100 
     def render(self, screen):
-        print(f'{self.__class__.__name__} Rendering at: ({self.rect.x}, {self.rect.y})')
         super(Ball, self).render(screen)

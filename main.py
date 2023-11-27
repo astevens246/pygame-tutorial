@@ -1,10 +1,9 @@
+# main.py
 import pygame
 from constants import SCREEN_WIDTH, SCREEN_HEIGHT
 from gameobject import GameObject
 from ball import Ball
 from player import Player
-
-# Import other game objects as needed
 
 # Initialize Pygame
 pygame.init()
@@ -27,7 +26,8 @@ player = Player()
 soccer_ball = Ball('soccer_ball')
 basketball = Ball('basketball')
 tennis_ball = Ball('tennis_ball')
-bomb_ball = Ball('bomb_ball')  # Add a bomb ball
+bomb_ball = Ball('bomb_ball')  # Add this line
+
 
 # Add sprites to groups
 all_sprites.add(player, soccer_ball, basketball, tennis_ball, bomb_ball)
@@ -39,9 +39,16 @@ background_image = pygame.image.load('stadium.png')  # Replace with your image f
 background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
 background_rect = background_image.get_rect()
 
+# Initialize font
+font = pygame.font.Font(None, 36)  # None uses the default font, 36 is the font size
+
+# Initialize score
+score = 0
+
 # Create the game loop
 running = True
 while running:
+    # Look at events
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -68,22 +75,26 @@ while running:
     # Check for collisions with balls
     ball_collisions = pygame.sprite.spritecollide(player, balls_group, dokill=True)
 
-    # Handle ball collisions
+    # Handle ball collisions and update score
     for ball in ball_collisions:
-        if ball.ball_type == 'bomb_ball':  # Check if the collided ball is a bomb
-            player.reset()  # Reset player position
+        if ball.ball_type == 'bomb_ball':
+            # Reset the game on bomb collision
+            player.reset()
             for sprite in all_sprites:
-                sprite.reset()  # Reset all sprites
-            score = 0  # Reset the score
-            running = False  # End the game
+                sprite.reset()
+            score = 0
+        else:
+            # Increment score on other ball collisions
+            score += ball.reset()
 
     # Move and draw sprites
     for sprite in all_sprites:
         sprite.move()
-
-    # Draw sprites after clearing the screen
-    for sprite in all_sprites:
         sprite.render(screen)
+
+    # Draw the score text
+    score_text = font.render(f"Score: {score}", True, (255, 255, 255))
+    screen.blit(score_text, (10, 10))
 
     # Update the window
     pygame.display.flip()
