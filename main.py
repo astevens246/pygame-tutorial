@@ -27,10 +27,11 @@ player = Player()
 soccer_ball = Ball('soccer_ball')
 basketball = Ball('basketball')
 tennis_ball = Ball('tennis_ball')
+bomb_ball = Ball('bomb_ball')  # Add a bomb ball
 
 # Add sprites to groups
-all_sprites.add(player, soccer_ball, basketball, tennis_ball)
-balls_group.add(soccer_ball, basketball, tennis_ball)
+all_sprites.add(player, soccer_ball, basketball, tennis_ball, bomb_ball)
+balls_group.add(soccer_ball, basketball, tennis_ball, bomb_ball)
 player_group.add(player)
 
 # Load background image and scale it to the screen size
@@ -41,7 +42,6 @@ background_rect = background_image.get_rect()
 # Create the game loop
 running = True
 while running:
-    # Look at events
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -70,8 +70,12 @@ while running:
 
     # Handle ball collisions
     for ball in ball_collisions:
-        player.reset()  # Reset player position
-        ball.reset()  # Reset the collided ball
+        if ball.ball_type == 'bomb_ball':  # Check if the collided ball is a bomb
+            player.reset()  # Reset player position
+            for sprite in all_sprites:
+                sprite.reset()  # Reset all sprites
+            score = 0  # Reset the score
+            running = False  # End the game
 
     # Move and draw sprites
     for sprite in all_sprites:
