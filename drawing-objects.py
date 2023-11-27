@@ -14,76 +14,63 @@ clock = pygame.time.Clock()
 
 # Define the GameObject class as a base class for other sprites
 class GameObject(pygame.sprite.Sprite):
-    def __init__(self, x, y, image):
+    def __init__(self, x, y, image, width=None, height=None):
         super(GameObject, self).__init__()
         self.image = pygame.image.load(image)  # Load image
+        if width and height:
+            self.image = pygame.transform.scale(self.image, (width, height))  # Resize image
         self.rect = self.image.get_rect(topleft=(x, y))
         self.x = x
         self.y = y
 
     def render(self, screen):
-        screen.blit(self.image, (self.x, self.y))
+        screen.blit(self.image, self.rect.topleft)
 
-    def move(self):
-        pass  # Placeholder method, to be overridden by subclasses
-
-# Define the Apple class, inheriting from GameObject
-class Apple(GameObject):
-    def __init__(self):
-        super(Apple, self).__init__(0, -64, 'apple.png')  # Start from top with a random x position
+class Ball(GameObject):
+    def __init__(self, ball_type):
+        super(Ball, self).__init__(0, -64, f'{ball_type}.png', 50, 50)  
         self.dx = 0
-        self.dy = (randint(1, 3))  # Move downward
+        self.dy = randint(1, 2)  
         self.reset()
+        print(f'{ball_type} Image Path: {self.image}')
 
     def move(self):
-        self.y += self.dy
-        if self.y > 500:
+        self.rect.y += self.dy
+        if self.rect.y > 500:
             self.reset()
-
+            
     def reset(self):
-        self.x = random.choice(lanes)
-        self.y = -64
+        self.rect.x = random.choice(lanes)
+        self.rect.y = -64
+        self.dy = randint(1, 2)
 
-# Define the Strawberry class, inheriting from GameObject
-class Strawberry(GameObject):
-    def __init__(self):
-        super(Strawberry, self).__init__(0, -64, 'strawberry.png')  # Start from left with a random y position
-        self.dx = randint(1, 3)  # Move from left to right
-        self.dy = 0
-        self.reset()
-
-    def move(self):
-        self.x += self.dx
-        if self.x > 500:
-            self.reset()
-
-    def reset(self):
-        self.x = random.choice(lanes)  # Randomly choose between lanes
-        self.y = randint(0, 500)
+    def render(self, screen):
+        print(f'{self.__class__.__name__} Rendering at: ({self.x}, {self.y})')
+        super(Ball, self).render(screen)
 
 # Define the Player class, inheriting from GameObject
 class Player(GameObject):
     def __init__(self):
-        super(Player, self).__init__(0, 0, 'player.png')
+        super(Player, self).__init__(0, 0, 'player.png', 50, 50)
         self.dx = 0
         self.dy = 0
         self.reset()
 
     def left(self):
-        self.dx -= 100
+        self.dx -= 20  # Increase the increment
 
     def right(self):
-        self.dx += 100
+        self.dx += 20
 
     def up(self):
-        self.dy -= 100
+        self.dy -= 20
 
     def down(self):
-        self.dy += 100
+        self.dy += 20
 
     def move(self):
-        self.x -= (self.x - self.dx) * 0.25
-        self.y -= (self.y - self.dy) * 0.25
+        self.rect.x -= (self.rect.x - self.dx) * 0.25
+        self.rect.y -= (self.rect.y - self.dy) * 0.25
 
         # Restrict the player's position to stay within the screen boundaries
         self.x = max(0, min(self.x, 500 - self.image.get_width()))
@@ -92,62 +79,42 @@ class Player(GameObject):
     def reset(self):
         self.x = 250 - 32
         self.y = 250 - 32
+        self.dx = 0
+        self.dy = 0
 
-# Define the Bomb class, inheriting from GameObject
-class Bomb(GameObject):
-    def __init__(self):
-        super(Bomb, self).__init__(0, 0, 'bomb.png')
-        self.image = pygame.transform.scale(self.image, (64, 64))  # Resize the image
-        self.reset_direction()
-
-    def reset(self):
-        self.x = choice(lanes)
-        self.y = choice(lanes)
-        
-    def reset_direction(self):
-        # Choose a random direction: 0 for up, 1 for down, 2 for left, 3 for right
-        self.direction = randint(0, 3)
-        self.dx = 5  # You can adjust the speed as needed
-        self.dy = 5
-
-    def move(self):
-        if self.direction == 0:
-            self.y -= self.dy
-        elif self.direction == 1:
-            self.y += self.dy
-        elif self.direction == 2:
-            self.x -= self.dx
-        elif self.direction == 3:
-            self.x += self.dx
-
-        # Check if the bomb is off the screen, then reset its direction
-        if (self.direction == 0 and self.y < -64) or (self.direction == 1 and self.y > 500) or \
-           (self.direction == 2 and self.x < -64) or (self.direction == 3 and self.x > 500):
-            self.reset_direction()
+    def render(self, screen):
+        screen.blit(self.image, self.rect.topleft)
 
 # Configure the screen
 screen = pygame.display.set_mode([500, 500])
 
 # Create sprite groups
 all_sprites = pygame.sprite.Group()
-apples_group = pygame.sprite.Group()
-strawberries_group = pygame.sprite.Group()
+balls_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 
-# Create the apple, strawberry, player, and bomb objects
-apple = Apple()
-strawberry = Strawberry()
+# Create the player object
 player = Player()
-bomb = Bomb()
+
+# Create different sports balls
+soccer_ball = Ball('soccer_ball')
+basketball = Ball('basketball')
+tennis_ball = Ball('tennis_ball')
 
 # Add sprites to groups
-all_sprites.add(apple, strawberry, player, bomb)
-apples_group.add(apple)
-strawberries_group.add(strawberry)
+all_sprites.add(player, soccer_ball, basketball, tennis_ball)
+balls_group.add(soccer_ball, basketball, tennis_ball)
 player_group.add(player)
 
 
- #Create the game loop
+# Load background image (or set background color)
+background_image = pygame.image.load('stadium.png')  # Replace with your image file or use a color
+background_image = pygame.transform.scale(background_image, (500, 500))
+background_rect = background_image.get_rect()
+
+# ... (your existing code)
+
+# Create the game loop
 running = True
 while running:
     # Look at events
@@ -166,20 +133,34 @@ while running:
             elif event.key == pygame.K_DOWN:
                 player.down()
 
+    # Clear screen with background image (or color)
+    screen.blit(background_image, background_rect)
+
     # Update all sprites
     all_sprites.update()
+    balls_group.update()
+    player_group.update()
 
-    # Clear screen
-    screen.fill((0, 0, 0))
+    # Check for collisions with balls
+    ball_collisions = pygame.sprite.spritecollide(player, balls_group, dokill=True)
+
+    # Handle ball collisions
+    for ball in ball_collisions:
+        player.reset()  # Reset player position
+        ball.reset()  # Reset the collided ball
 
     # Move and draw sprites
     for sprite in all_sprites:
         sprite.move()
+
+    # Draw sprites after clearing the screen
+    for sprite in all_sprites:
         sprite.render(screen)
 
     # Update the window
     pygame.display.flip()
     clock.tick(60)
+
 
 # Quit pygame when the loop exits
 pygame.quit()
