@@ -1,4 +1,3 @@
-# main.py
 import pygame
 from constants import SCREEN_WIDTH, SCREEN_HEIGHT
 from gameobject import GameObject
@@ -26,8 +25,7 @@ player = Player()
 soccer_ball = Ball('soccer_ball')
 basketball = Ball('basketball')
 tennis_ball = Ball('tennis_ball')
-bomb_ball = Ball('bomb_ball')  # Add this line
-
+bomb_ball = Ball('bomb_ball')
 
 # Add sprites to groups
 all_sprites.add(player, soccer_ball, basketball, tennis_ball, bomb_ball)
@@ -45,60 +43,72 @@ font = pygame.font.Font(None, 36)  # None uses the default font, 36 is the font 
 # Initialize score
 score = 0
 
+# Define game states
+READY_STATE = 'ready'
+PLAYING_STATE = 'playing'
+GAME_OVER_STATE = 'game_over'
+
+# Set initial game state
+game_state = READY_STATE
 # Create the game loop
 running = True
 while running:
-    # Look at events
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 running = False
-            elif event.key == pygame.K_LEFT:
-                player.left()
-            elif event.key == pygame.K_RIGHT:
-                player.right()
-            elif event.key == pygame.K_UP:
-                player.up()
-            elif event.key == pygame.K_DOWN:
-                player.down()
+            elif event.key == pygame.K_RETURN:
+                if game_state == READY_STATE:
+                    game_state = PLAYING_STATE
+                    score = 0
+                    player.reset()
+                    for sprite in all_sprites:
+                        sprite.reset()
+                elif game_state == GAME_OVER_STATE:
+                    game_state = READY_STATE
 
-    # Clear screen with scaled background image
+            # Handle arrow key events only when in the playing state
+            elif game_state == PLAYING_STATE:
+                if event.key == pygame.K_LEFT:
+                    player.left()
+                elif event.key == pygame.K_RIGHT:
+                    player.right()
+                elif event.key == pygame.K_UP:
+                    player.up()
+                elif event.key == pygame.K_DOWN:
+                    player.down()
+
     screen.blit(background_image, background_rect)
 
-    # Update all sprites
-    all_sprites.update()
-    balls_group.update()
-    player_group.update()
+    if game_state == READY_STATE:
+        ready_text = font.render("Press Enter to Start", True, (255, 255, 255))
+        screen.blit(ready_text, (SCREEN_WIDTH // 2 - 150, SCREEN_HEIGHT // 2))
+    elif game_state == PLAYING_STATE:
+        all_sprites.update()
+        balls_group.update()
+        player_group.update()
+        ball_collisions = pygame.sprite.spritecollide(player, balls_group, dokill=True)
+        for ball in ball_collisions:
+            if ball.ball_type == 'bomb_ball':
+                game_state = GAME_OVER_STATE
+                player.reset()
+                for sprite in all_sprites:
+                    sprite.reset()
+                score = 0
+            else:
+                score += ball.reset()
+        for sprite in all_sprites:
+            sprite.move()
+            sprite.render(screen)
+        score_text = font.render(f"Score: {score}", True, (255, 255, 255))
+        screen.blit(score_text, (10, 10))
+    elif game_state == GAME_OVER_STATE:
+        game_over_text = font.render("Game Over. Press Enter to Restart", True, (255, 255, 255))
+        screen.blit(game_over_text, (SCREEN_WIDTH // 2 - 200, SCREEN_HEIGHT // 2))
 
-    # Check for collisions with balls
-    ball_collisions = pygame.sprite.spritecollide(player, balls_group, dokill=True)
-
-    # Handle ball collisions and update score
-    for ball in ball_collisions:
-        if ball.ball_type == 'bomb_ball':
-            # Reset the game on bomb collision
-            player.reset()
-            for sprite in all_sprites:
-                sprite.reset()
-            score = 0
-        else:
-            # Increment score on other ball collisions
-            score += ball.reset()
-
-    # Move and draw sprites
-    for sprite in all_sprites:
-        sprite.move()
-        sprite.render(screen)
-
-    # Draw the score text
-    score_text = font.render(f"Score: {score}", True, (255, 255, 255))
-    screen.blit(score_text, (10, 10))
-
-    # Update the window
     pygame.display.flip()
     clock.tick(60)
 
-# Quit pygame when the loop exits
 pygame.quit()

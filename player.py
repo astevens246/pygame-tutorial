@@ -1,3 +1,4 @@
+# player.py
 import pygame
 from gameobject import GameObject
 
@@ -9,7 +10,7 @@ class Player(GameObject):
         self.reset()
 
     def left(self):
-        self.dx -= 20  # Increase the increment
+        self.dx -= 20
 
     def right(self):
         self.dx += 20
@@ -36,3 +37,7 @@ class Player(GameObject):
 
     def render(self, screen):
         screen.blit(self.image, self.rect.topleft)
+
+    def get_radius(self):
+        # Return the radius of the circular hitbox
+        return self.rect.width // 2
