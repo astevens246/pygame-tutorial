@@ -1,4 +1,3 @@
-# player.py
 import pygame
 from gameobject import GameObject
 
@@ -39,5 +38,8 @@ class Player(GameObject):
         screen.blit(self.image, self.rect.topleft)
 
     def get_radius(self):
-        # Return the radius of the circular hitbox
         return self.rect.width // 2
+
+    def update(self):
+        self.move()
+        # Add any other update logic for the player

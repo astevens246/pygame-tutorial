@@ -1,3 +1,4 @@
+# gameobject.py
 import pygame
 
 class GameObject(pygame.sprite.Sprite):
