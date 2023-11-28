@@ -22,7 +22,7 @@ class Ball(GameObject):
         self.rect.x = choice(lanes)
         self.rect.y = -64
         self.dy = randint(1, 2)
-        return 1  # Return 1 to indicate a successful reset
+        return 50  
 
     def render(self, screen):
         super(Ball, self).render(screen)

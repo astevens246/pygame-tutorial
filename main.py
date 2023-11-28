@@ -1,5 +1,6 @@
 # main.py
 import pygame
+import random
 from constants import SCREEN_WIDTH, SCREEN_HEIGHT
 from gameobject import GameObject
 from ball import Ball
@@ -31,9 +32,45 @@ bomb_ball = Ball('bomb_ball', 'bomb_ball.png')
 apple = Ball('apple', 'apple.png')
 strawberry = Ball('strawberry', 'strawberry.png')
 
-# Add player and balls to sprite groups
-all_sprites.add(player, soccer_ball, basketball, tennis_ball, bomb_ball, apple, strawberry)
-balls_group.add(soccer_ball, basketball, tennis_ball, bomb_ball, apple, strawberry)
+# Create more instances of the same sprites
+additional_soccer_balls = [Ball('soccer_ball', 'soccer_ball.png') for _ in range(3)]
+additional_basketballs = [Ball('basketball', 'basketball.png') for _ in range(3)]
+additional_tennis_balls = [Ball('tennis_ball', 'tennis_ball.png') for _ in range(3)]
+additional_bomb_balls = [Ball('bomb_ball', 'bomb_ball.png') for _ in range(3)]
+additional_apples = [Ball('apple', 'apple.png') for _ in range(3)]
+additional_strawberries = [Ball('strawberry', 'strawberry.png') for _ in range(3)]
+
+# Add new instances to sprite groups
+all_sprites.add(
+    player,
+    soccer_ball,
+    basketball,
+    tennis_ball,
+    bomb_ball,
+    apple,
+    strawberry,
+    *additional_soccer_balls,
+    *additional_basketballs,
+    *additional_tennis_balls,
+    *additional_bomb_balls,
+    *additional_apples,
+    *additional_strawberries
+)
+
+balls_group.add(
+    soccer_ball,
+    basketball,
+    tennis_ball,
+    bomb_ball,
+    apple,
+    strawberry,
+    *additional_soccer_balls,
+    *additional_basketballs,
+    *additional_tennis_balls,
+    *additional_bomb_balls,
+    *additional_apples,
+    *additional_strawberries
+)
 
 # Load background image and scale it to the screen size
 background_image = pygame.image.load('stadium.png')  # Replace with your image file
@@ -50,11 +87,9 @@ GAME_OVER_STATE = 'game_over'
 # Set initial game state
 game_state = READY_STATE
 
-# Initialize the dictionary to track collected objects
-collected_objects = {}
-
 # Create the game loop
 running = True
+score = 0  # Initialize score outside the loop
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -69,8 +104,6 @@ while running:
                         sprite.reset()
                     score = 0
                     player.reset()
-                    # Reset the collected objects dictionary when restarting
-                    collected_objects = {}
                 elif game_state == GAME_OVER_STATE:
                     game_state = READY_STATE
 
@@ -108,20 +141,7 @@ while running:
                     if isinstance(sprite, Ball):
                         sprite.reset()
                 score = 0
-                # Reset the collected objects dictionary when the game is over
-                collected_objects = {}
             else:
-                # Check if the ball type is in the collected_objects dictionary
-                if ball.ball_type in collected_objects:
-                    collected_objects[ball.ball_type] += 1
-                else:
-                    collected_objects[ball.ball_type] = 1
-
-                # Check if a set of the same type is completed
-                if collected_objects[ball.ball_type] % 3 == 0:
-                    score += 100  # Award extra points for completing a set
-
-                # Update the score based on the ball reset value
                 score += ball.reset()
 
         score_text = font.render(f"Score: {score}", True, (255, 255, 255))
